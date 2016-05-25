@@ -7,7 +7,7 @@ class BlogSpider(scrapy.Spider):
 
     # start_urls = ['http://listado.tucarro.com.co/carros/renault/sandero-stepway/']
 
-    rate = 10
+    rate = 5
 
     def __init__(self):
       scrapy.Spider.__init__(self)
@@ -67,7 +67,10 @@ class BlogSpider(scrapy.Spider):
         url = anchor.extract()
         print url
         print "Parse url=", response.urljoin(url)
-        yield scrapy.Request(response.urljoin(url), self.parse)
+        req = scrapy.Request(response.urljoin(url), self.parseCar)
+        req.meta["maker"] = response.meta["maker"]
+        req.meta["model"] = response.meta["model"]
+        yield req
 
 
     # def parse_car(self, car):
