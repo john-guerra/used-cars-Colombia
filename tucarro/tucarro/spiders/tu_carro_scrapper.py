@@ -5,11 +5,6 @@ class BlogSpider(scrapy.Spider):
     name = 'tuCarroScrapper'
     start_urls = ['https://carros.tucarro.com.co']
     allowed_domains = ['tucarro.com.co']
-    rate = 5
-
-    def __init__(self):
-        scrapy.Spider.__init__(self)
-        self.download_delay = 1 / float(self.rate)
 
     def parse(self, response):
         # for maker in response.css('dl#id_9991744-AMCO_1744_1.filters__brand dd'):  # Popular only
