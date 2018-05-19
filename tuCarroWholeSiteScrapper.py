@@ -36,10 +36,9 @@ class BlogSpider(scrapy.Spider):
                                  meta=response.meta)
             yield req
 
-    def parseCar(self, response):
+    def parse_car(self, response):
 
-      for car in response.css('#searchResults .rowItem'):
-        title = car.css('.list-view-item-title a::text').extract()[0]
+        title = response.css('.item-title__primary::text').extract_first(default='').strip()
 
         # # Check that the title includes the maker and model
         # if title.upper().find(response.meta['maker'].upper()) == -1 or \
@@ -47,51 +46,50 @@ class BlogSpider(scrapy.Spider):
         #   print "Car title doesn't include maker/model skipping", response.meta['maker'], response.meta['model'], title
         #   continue
 
+        # print "Parse car ", title
+        # print "Parsing maker ", response.meta.get('maker'), " model ", response.meta.get('model')
 
-        print "Parse car ", title
+        kms = response.css('.vip-classified-info dd::text').extract()
+        if len(kms) > 1:
+            kms = kms[1]
+            kms = kms.replace("Km", "")
+            kms = kms.replace("kms", "")
+            kms = kms.replace(",", "")
+            kms = kms.strip()
+        else:
+            kms = ""
 
-        kms = car.css('.destaque strong::text').extract()[1].replace("Km", "")
-        kms = kms.replace("kms", "")
-        kms = kms.replace(",", "")
-        kms = kms.strip()
-
-        price = car.css('.details .ch-price::text').extract()[0].replace("$", "")
+        price = response.css('.price-tag-fraction::text').extract_first(default='').replace("$", "")
         price = price.replace(".", "")
         price = price.strip()
 
-        yield {
-          'title':title,
-          'price':price,
-          'year':car.css('.destaque strong::text').extract()[0],
-          'kms':kms,
-          'link':car.css('.item-link::attr(href)').extract()[0],
-          'img':car.css('.item-link img::attr(src)').extract()[0],
-          'maker':response.meta['maker'],
-          'model':response.meta['model']
+        location = response.css('.location-info::text').extract()
+        if len(location) > 3:
+            location = location[3].strip()
+        else:
+            location = ""
+
+        description = response.css('#description-includes .item-description__text p::text').extract_first(default='')
+        phone_number = response.css('.profile-info-phone-value::text').extract_first(default='')
+        vehicle_data = {
+            'title': title,
+            'price': price,
+            'year': response.css('.vip-classified-info dd::text').extract_first(default=''),
+            'kms': kms,
+            'link': response.request.url,
+            # 'img': response.css('.gallery-trigger img::attr(src)').extract_first(default=''),
+            'maker': response.meta.get('maker'),
+            'model': response.meta.get('model'),
+            'location': location,
+            'description': description,
+            'phone_number': phone_number
         }
 
+        for item in response.css('.specs-item'):
+            property = item.css('strong::text').extract_first(default='')
+            value = item.css('span::text').extract_first(default='')
 
-      for anchor in response.css('.ch-pagination li a::attr(href)'):
-        url = anchor.extract()
-        print url
-        print "Parse url=", response.urljoin(url)
-        req = scrapy.Request(response.urljoin(url), self.parseCar)
-        req.meta["maker"] = response.meta["maker"]
-        req.meta["model"] = response.meta["model"]
-        yield req
+            if value:
+                vehicle_data[property] = value
 
-
-    # def parse_car(self, car):
-    #   print "Car function"
-    #   return {
-    #     'title':car.css('.list-view-item-title a::text').extract()[0],
-    #     'price':car.css('.details .ch-price::text').extract()[0],
-    #     'year':car.css('.destaque strong::text').extract()[0],
-    #     'kms':car.css('.destaque strong::text').extract()[1],
-    #     'link':car.css('.item-link::attr(href)').extract()[0],
-    #     'img':car.css('.item-link img::attr(src)').extract()[0]
-    #   }
-
-
-    #     for post_title in response.css('#searchResults .ch-carousel-item a::text').extract():
-    #         yield {'title': post_title}
+        yield vehicle_data
