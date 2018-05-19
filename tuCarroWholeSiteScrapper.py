@@ -8,14 +8,16 @@ class BlogSpider(scrapy.Spider):
     rate = 5
 
     def __init__(self):
-      scrapy.Spider.__init__(self)
-      self.download_delay = 1/float(self.rate)
+        scrapy.Spider.__init__(self)
+        self.download_delay = 1 / float(self.rate)
 
     def parse(self, response):
-      for maker in response.css('.nav.vertical-qcat dl#id_9991744-AMCO_1744_1 dd'):
-        req = scrapy.Request(response.urljoin(maker.css('a::attr("href")').extract()[0]), self.parseMaker)
-        req.meta["maker"] = maker.css("a::text").extract()[0]
-        yield req
+        # for maker in response.css('dl#id_9991744-AMCO_1744_1.filters__brand dd'):  # Popular only
+        for maker in response.css('.modal-location-filter-9991744-AMCO_1744_1 .location_filter_inner'):  # All makers
+            maker_url = response.urljoin(maker.css('a::attr("href")').extract_first(default=''))
+            maker_name = maker.css("a::text").extract_first(default='').strip()
+            req = scrapy.Request(url=maker_url, callback=self.parse_maker, meta={"maker": maker_name})
+            yield req
 
 
     def parseMaker(self, response):
