@@ -10,7 +10,7 @@ class BlogSpider(scrapy.Spider):
         # for maker in response.css('dl#id_9991744-AMCO_1744_1.filters__brand dd'):  # Popular only
         for maker in response.css('.modal-location-filter-9991744-AMCO_1744_1 .location_filter_inner'):  # All makers
             maker_url = response.urljoin(maker.css('a::attr("href")').extract_first(default=''))
-            req = scrapy.Request(url=maker_url, callback=self.parse_grid)
+            req = scrapy.Request(url=maker_url, callback=self.parse_grid, meta={'dont_cache': True})
             yield req
 
     def parse_grid(self, response):
@@ -21,7 +21,7 @@ class BlogSpider(scrapy.Spider):
         next_page = response.css('.pagination__page--current + li.pagination__page')
         if next_page:
             req = scrapy.Request(url=response.urljoin(next_page.css('a::attr("href")').extract_first(default='')),
-                                 callback=self.parse_grid)
+                                 callback=self.parse_grid, meta={'dont_cache': True})
             yield req
 
     def parse_car(self, response):
