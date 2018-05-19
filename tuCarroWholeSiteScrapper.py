@@ -29,6 +29,12 @@ class BlogSpider(scrapy.Spider):
                                  meta=meta)
             yield req
 
+    def parse_grid(self, response):
+        for item in response.css('.results-item'):
+            req = scrapy.Request(url=response.urljoin(item.css('a::attr("href")').extract_first(default='')),
+                                 callback=self.parse_car,
+                                 meta=response.meta)
+            yield req
 
     def parseCar(self, response):
 
