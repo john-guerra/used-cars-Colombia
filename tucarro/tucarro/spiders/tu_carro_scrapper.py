@@ -18,6 +18,11 @@ class BlogSpider(scrapy.Spider):
             req = scrapy.Request(url=response.urljoin(item.css('a::attr("href")').extract_first(default='')),
                                  callback=self.parse_car)
             yield req
+        next_page = response.css('.pagination__page--current + li')
+        if next_page:
+            req = scrapy.Request(url=response.urljoin(next_page.css('a::attr("href")').extract_first(default='')),
+                                 callback=self.parse_grid)
+            yield req
 
     def parse_car(self, response):
 
