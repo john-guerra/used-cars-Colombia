@@ -23,15 +23,6 @@ class BlogSpider(scrapy.Spider):
 
         title = response.css('.item-title__primary::text').extract_first(default='').strip()
 
-        # # Check that the title includes the maker and model
-        # if title.upper().find(response.meta['maker'].upper()) == -1 or \
-        #    title.upper().find(response.meta['model'].upper()) == -1:
-        #   print "Car title doesn't include maker/model skipping", response.meta['maker'], response.meta['model'], title
-        #   continue
-
-        # print "Parse car ", title
-        # print "Parsing maker ", response.meta.get('maker'), " model ", response.meta.get('model')
-
         kms = response.css('.vip-classified-info dd::text').extract()
         if len(kms) > 1:
             kms = kms[1]
