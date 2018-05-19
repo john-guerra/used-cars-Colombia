@@ -1,11 +1,9 @@
 import scrapy
 
+
 class BlogSpider(scrapy.Spider):
     name = 'tuCarroScrapper'
-    start_urls = ['http://listado.tucarro.com.co/carros/']
-
-
-    # start_urls = ['http://listado.tucarro.com.co/carros/renault/sandero-stepway/']
+    start_urls = ['https://carros.tucarro.com.co']
 
     rate = 5
 
