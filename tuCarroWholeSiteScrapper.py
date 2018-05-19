@@ -19,13 +19,15 @@ class BlogSpider(scrapy.Spider):
             req = scrapy.Request(url=maker_url, callback=self.parse_maker, meta={"maker": maker_name})
             yield req
 
-
-    def parseMaker(self, response):
-      for model in response.css('.nav.vertical-qcat dl#id_9991744-AMCO_1744_2 dd'):
-        req = scrapy.Request(response.urljoin(model.css('a::attr("href")').extract()[0]), self.parseCar)
-        req.meta["model"] = model.css("a::text").extract()[0]
-        req.meta["maker"] = response.meta["maker"]
-        yield req
+    def parse_maker(self, response):
+        # for model in response.css('dl#id_9991744-AMCO_1744_2.filters__model dd'):  # Popular only
+        for model in response.css('.modal-location-filter-9991744-AMCO_1744_2 .location_filter_inner'):  # All models
+            meta = response.meta
+            meta["model"] = model.css("a::text").extract_first(default='').strip()
+            req = scrapy.Request(url=response.urljoin(model.css('a::attr("href")').extract_first(default='')),
+                                 callback=self.parse_grid,
+                                 meta=meta)
+            yield req
 
 
     def parseCar(self, response):
