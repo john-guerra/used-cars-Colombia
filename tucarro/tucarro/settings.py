@@ -88,5 +88,5 @@ HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-FEED_EXPORT_ENCODING = 'iso-8859-1'
+FEED_EXPORT_ENCODING = 'utf-8'
 LOG_LEVEL = 'INFO'
