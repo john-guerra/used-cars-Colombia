@@ -4,7 +4,7 @@ import scrapy
 class BlogSpider(scrapy.Spider):
     name = 'tuCarroScrapper'
     start_urls = ['https://carros.tucarro.com.co']
-
+    allowed_domains = ['tucarro.com.co']
     rate = 5
 
     def __init__(self):
