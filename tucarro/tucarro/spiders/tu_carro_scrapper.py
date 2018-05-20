@@ -7,25 +7,19 @@ class BlogSpider(scrapy.Spider):
     allowed_domains = ['tucarro.com.co']
 
     def parse(self, response):
-        # for maker in response.css('dl#id_9991744-AMCO_1744_1.filters__brand dd'):  # Popular only
-        for maker in response.css('.modal-location-filter-9991744-AMCO_1744_1 .location_filter_inner'):  # All makers
-            maker_url = response.urljoin(maker.css('a::attr("href")').extract_first(default=''))
-            req = scrapy.Request(url=maker_url, callback=self.parse_grid, meta={'dont_cache': True})
-            yield req
+        # for maker in response.css('dl#id_9991744-AMCO_1744_1.filters__brand dd a'):  # Popular only
+        for maker in response.css('.modal-location-filter-9991744-AMCO_1744_1 .location_filter_inner a'):  # All makers
+            yield response.follow(url=maker, callback=self.parse_grid, meta={'dont_cache': True})
 
     def parse_grid(self, response):
-        for item in response.css('.results-item'):
-            req = scrapy.Request(url=response.urljoin(item.css('a::attr("href")').extract_first(default='')),
-                                 callback=self.parse_car)
-            yield req
-        next_page = response.css('.pagination__page--current + li.pagination__page')
+        for item in response.css('#results-section .results-item .rowItem > a'):
+            yield response.follow(url=item, callback=self.parse_car)
+        next_page = response.css('.pagination__page--current + li.pagination__page a::attr(href)').extract_first()
         if next_page:
-            req = scrapy.Request(url=response.urljoin(next_page.css('a::attr("href")').extract_first(default='')),
-                                 callback=self.parse_grid, meta={'dont_cache': True})
-            yield req
+            yield response.follow(url=next_page, callback=self.parse_grid, meta={'dont_cache': True})
 
     def parse_car(self, response):
-
+        self.logger.info("Parsing: %s" % response.request.url)
         title = response.css('.item-title__primary::text').extract_first(default='').strip()
 
         kms = response.css('.vip-classified-info dd::text').extract()
