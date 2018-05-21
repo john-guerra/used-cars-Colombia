@@ -55,6 +55,9 @@ class BlogSpider(scrapy.Spider):
             'phone_number': phone_number
         }
 
+        if location:
+            vehicle_data['departamento'] = location.split("-")[-1].strip()
+
         for item in response.css('.specs-item'):
             property = item.css('strong::text').extract_first(default='')
             value = item.css('span::text').extract_first(default='')
