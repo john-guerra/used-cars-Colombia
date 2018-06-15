@@ -22,16 +22,6 @@ class BlogSpider(scrapy.Spider):
         self.logger.info("Parsing: %s" % response.request.url)
         title = response.css('.item-title__primary::text').extract_first(default='').strip()
 
-        kms = response.css('.vip-classified-info dd::text').extract()
-        if len(kms) > 1:
-            kms = kms[1]
-            kms = kms.replace("Km", "")
-            kms = kms.replace("kms", "")
-            kms = kms.replace(",", "")
-            kms = kms.strip()
-        else:
-            kms = ""
-
         price = response.css('.price-tag-fraction::text').extract_first(default='').replace("$", "")
         price = price.replace(".", "")
         price = price.strip()
@@ -47,8 +37,6 @@ class BlogSpider(scrapy.Spider):
         vehicle_data = {
             'title': title,
             'price': price,
-            'year': response.css('.vip-classified-info dd::text').extract_first(default=''),
-            'kms': kms,
             'link': response.request.url,
             'location': location,
             'description': description,
